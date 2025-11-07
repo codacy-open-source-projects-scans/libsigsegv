@@ -4,9 +4,9 @@
 # also regenerates all aclocal.m4, config.h.in, Makefile.in, configure files
 # with new versions of autoconf or automake.
 #
-# This script requires autoconf-2.70..2.72 and automake-1.13..1.17 in the PATH.
+# This script requires autoconf-2.70..2.72 and automake-1.13..1.18 in the PATH.
 
-# Copyright (C) 2009-2024 Free Software Foundation, Inc.
+# Copyright (C) 2009-2025 Free Software Foundation, Inc.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -70,6 +70,8 @@ if test $skip_gnulib = false; then
   for file in config.guess config.sub; do
     $GNULIB_TOOL --copy-file build-aux/$file; chmod a+x build-aux/$file
   done
+  # Fetch INSTALL.generic.
+  $GNULIB_TOOL --copy-file doc/INSTALL.UTF-8 INSTALL.generic
 fi
 
 # Generate aclocal.m4.
@@ -78,8 +80,8 @@ aclocal
 autoconf
 # Generate config.h.in.
 autoheader && touch config.h.in
-# Generate Makefile.in, src/Makefile.in, tests/Makefile.in, and some
-# build-aux/* files.
+# Generate Makefile.in, src/Makefile.in, tests/Makefile.in,
+# install-tests/Makefile.in, and some build-aux/* files.
 # Make sure we get new versions of files brought in by automake.
 (cd build-aux && rm -f ar-lib compile depcomp install-sh mdate-sh missing test-driver)
 automake --add-missing --copy

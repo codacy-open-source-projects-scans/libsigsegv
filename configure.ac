@@ -1,7 +1,7 @@
 dnl Autoconf configuration for libsigsegv.
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl Copyright (C) 2002-2023  Bruno Haible <bruno@clisp.org>
+dnl Copyright (C) 2002-2025  Bruno Haible <bruno@clisp.org>
 dnl
 dnl This program is free software: you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.64])
-AC_INIT([libsigsegv], [2.14])
+AC_INIT([libsigsegv], [2.15])
 AC_CONFIG_SRCDIR([src/sigsegv.h.in])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIRS([m4])
@@ -1101,8 +1101,56 @@ if test $enable_EFAULT = yes; then
 fi
 
 
+dnl Compilation on native Windows and Cygwin with --enable-shared needs special
+dnl handling of exported variables.
+if test "$enable_shared" = yes; then
+  case "$host_os" in
+    mingw* | windows* | cygwin*) is_woe32dll=yes ;;
+    *) is_woe32dll=no ;;
+  esac
+else
+  is_woe32dll=no
+fi
+AM_CONDITIONAL([WOE32DLL], [test $is_woe32dll = yes])
+if test $is_woe32dll = yes; then
+  WOE32DLL=1
+else
+  WOE32DLL=0
+fi
+AC_SUBST([WOE32DLL])
+
+dnl Linking a shared library works slightly differently on MSVC than on
+dnl Cygwin and mingw.
+is_msvc=false
+case "$host_os" in
+  windows*-msvc*) is_msvc=true ;;
+  mingw* | windows*)
+    AC_EGREP_CPP([Special], [
+#ifdef _MSC_VER
+ Special
+#endif
+], [is_msvc=true])
+    ;;
+esac
+AM_CONDITIONAL([WINDOWS_MSVC], [$is_msvc])
+
+
 dnl Test for features used in tests.
 AC_TYPE_UINTPTR_T
+
+
+dnl Test for features used in install-tests.
+dnl shlibpath_var and PATH_SEPARATOR are set by LT_INIT.
+if test -n "${shlibpath_var}"; then
+  if test "${shlibpath_var}" = PATH; then
+    AUGMENT_SHLIBPATH="PATH='\$(bindir)'${PATH_SEPARATOR}\"\$\$PATH\";"
+  else
+    AUGMENT_SHLIBPATH="${shlibpath_var}='\$(libdir)':\"\$\$${shlibpath_var}\"; export ${shlibpath_var};"
+  fi
+else
+  AUGMENT_SHLIBPATH=
+fi
+AC_SUBST([AUGMENT_SHLIBPATH])
 
 
 { echo; echo "${term_bold}Build Parameters:${term_norm}"; } >& AS_MESSAGE_FD
@@ -1115,7 +1163,8 @@ gl_RELOCATABLE_NOP
 dnl AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([Makefile
                  src/Makefile src/sigsegv.h
-                 tests/Makefile])
+                 tests/Makefile
+                 install-tests/Makefile])
 
 { echo; echo "Now please type '${term_bold}make${term_norm}' to compile. Good luck."; echo; } >& AS_MESSAGE_FD
 

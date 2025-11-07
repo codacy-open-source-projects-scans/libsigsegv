@@ -1,5 +1,5 @@
 ## Makefile for libsigsegv/src.
-## Copyright (C) 2002-2006, 2008-2011, 2016-2018, 2021-2023 Bruno Haible <bruno@clisp.org>
+## Copyright (C) 2002-2006, 2008-2011, 2016-2018, 2021-2023, 2025 Bruno Haible <bruno@clisp.org>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -85,9 +85,19 @@ libsigsegv_la_LDFLAGS = \
   -version-info $(LIBSIGSEGV_VERSION_INFO) \
   -lc -no-undefined
 
+# Needed on MSVC.
+libsigsegv_la_CPPFLAGS = $(AM_CPPFLAGS) -DIN_LIBSIGSEGV
+
+# Tell the mingw or Cygwin linker which symbols to export.
+if WOE32DLL
+if !WINDOWS_MSVC
+libsigsegv_la_LDFLAGS += -Wl,--export-all-symbols
+endif
+endif
+
 # Before making a release, change this according to the libtool documentation,
 # section "Library interface versions".
-LIBSIGSEGV_VERSION_INFO = 2:7:0
+LIBSIGSEGV_VERSION_INFO = 2:8:0
 
 # Dependencies.
 handler.$(OBJEXT) : ../config.h sigsegv.h @CFG_HANDLER@ $(noinst_HEADERS) 
