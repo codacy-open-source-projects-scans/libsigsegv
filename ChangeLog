@@ -1,3 +1,39 @@
+2025-12-10  Bruno Haible  <bruno@clisp.org>
+
+	Reduce scope of local variables.
+	M = Move variable declaration to its initialization.
+	R = Reduce scope.
+	S = Split scope, create separate variables from one variable.
+	B = Insert braces, creating a block scope.
+	* src/stackvma-aix.c (vma_iterate): MR.
+	* src/stackvma-beos.c (vma_iterate): M.
+	* src/stackvma-mincore.c (mapped_range_start): M.
+	(mapped_range_end): M.
+	(is_unmapped): MR.
+	* src/stackvma-mquery.c (mapped_range_start): M.
+	(mapped_range_end): M.
+	* src/stackvma-procfs.c (vma_iterate): MR.
+	* src/stackvma-rofile.c (rof_open): M.
+	* src/stackvma-vma-iter.c (vma_iterate_proc): RSB.
+	(vma_iterate_bsd): MB.
+
+2025-09-12  Bruno Haible  <bruno@clisp.org>
+
+	tests: Prefer the __gnu_hurd__ macro over __GNU__.
+	Patch by Collin Funk in gnulib 2025-03-18 (tiny change).
+	* tests/test-catch-stackoverflow1.c: Replace use of __GNU__ with
+	__gnu_hurd__.
+	* tests/test-catch-stackoverflow2.c: Likewise.
+
+2025-09-12  Bruno Haible  <bruno@clisp.org>
+
+	tests: Work around a longjmp bug on GNU/Hurd.
+	From gnulib 2025-01-05.
+	* tests/test-catch-stackoverflow1.c (_FORTIFY_SOURCE,
+	__USE_FORTIFY_LEVEL): Undefine, as a workaround to the Hurd longjmp bug.
+	* tests/test-catch-stackoverflow2.c (_FORTIFY_SOURCE,
+	__USE_FORTIFY_LEVEL): Likewise.
+
 2025-08-01  Bruno Haible  <bruno@clisp.org>
 
 	Use new ioctl available in Linux >= 6.11.
